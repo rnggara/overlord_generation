@@ -22,8 +22,6 @@ class Authentication {
     );
   }
 
-  Future checkEmail() async {}
-
   static Future<FirebaseApp> initializeFirebase({
     required BuildContext context,
   }) async {

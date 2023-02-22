@@ -29,6 +29,8 @@ class _CreateCharState extends State<CreateChar> {
   List<String> gender = <String>['Male', 'Female'];
   List<String> classes = <String>['Warrior', 'Mage', 'Archer', 'Thief'];
 
+  String? char_img = "assets/images/characters/default.jpg";
+
   bool loading = false;
   String errorMsg = "";
 
@@ -236,20 +238,33 @@ class _CreateCharState extends State<CreateChar> {
                                         setState(() {
                                           genderSel = value!;
                                         });
-                                      })
+                                      }),
+                                  SizedBox(
+                                    height: 40,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "Select image\n(tap to change)",
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.normal,
+                                            fontFamily: "Montserrat"),
+                                      ),
+                                      ClipRect(
+                                        child: Material(
+                                          child:
+                                              Image.asset(char_img.toString()),
+                                        ),
+                                      )
+                                    ],
+                                  )
                                 ],
                               )),
                           SizedBox(
                             height: 5,
-                          ),
-                          Text(
-                            errorMsg,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
-                                fontWeight: FontWeight.normal,
-                                fontFamily: "Montserrat"),
                           ),
                           SizedBox(
                             height: 10,

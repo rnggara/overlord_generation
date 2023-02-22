@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:overlord_generation/activitiy/create_char.dart';
 import 'package:overlord_generation/activitiy/create_family.dart';
+import 'package:overlord_generation/res/values.dart';
 import 'package:overlord_generation/utils/authentication.dart';
 import 'package:http/http.dart' as http;
 
@@ -46,6 +48,40 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
 
                 if (user != null) {
                   // masuk ke halaman user
+
+                  final uri = Uri.parse("$baseUri/og/check-email");
+
+                  final _post = {
+                    "email": user.email,
+                  };
+
+                  var hasChild = false;
+                  var hasFamily = false;
+
+                  try {
+                    final response = await http.post(uri, body: _post);
+
+                    final data = json.decode(response.body);
+
+                    var msg = "";
+                    if (data['success']) {
+                      final _user = data['data'];
+                      if (_user['hasChild'].length > 0) {
+                        hasChild = true;
+                      }
+                      hasFamily = true;
+                    }
+                  } catch (e) {}
+
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => hasFamily
+                          ? CreateChar(user: user)
+                          : CreateFamily(
+                              user: user,
+                            ),
+                    ),
+                  );
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (context) => CreateFamily(

@@ -78,6 +78,9 @@ flutter:
     - assets/
     - assets/images/
     - assets/images/bg/
+    - assets/images/characters/
+    - assets/images/characters/females/
+    - assets/images/characters/males/
     - assets/images/icons/
     - assets/fonts/
 
