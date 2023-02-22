@@ -1,11 +1,11 @@
 {
-    "name": "test_weather",
-    "short_name": "test_weather",
+    "name": "overlord_generation",
+    "short_name": "overlord_generation",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter application.",
+    "description": "Overlord Generation",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

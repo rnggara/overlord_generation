@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,7 +6,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:test_weather/activity/user_screen.dart';
+import 'package:overlord_generation/activitiy/create_char.dart';
+import 'package:overlord_generation/activitiy/create_family.dart';
+import 'package:overlord_generation/res/values.dart';
+import 'package:http/http.dart' as http;
 
 class Authentication {
   static SnackBar customSnackBar({required String content}) {
@@ -18,6 +22,8 @@ class Authentication {
     );
   }
 
+  Future checkEmail() async {}
+
   static Future<FirebaseApp> initializeFirebase({
     required BuildContext context,
   }) async {
@@ -26,11 +32,37 @@ class Authentication {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
+      final uri = Uri.parse("$baseUri/og/check-email");
+
+      final _post = {
+        "email": user.email,
+      };
+
+      var hasChild = false;
+      var hasFamily = false;
+
+      try {
+        final response = await http.post(uri, body: _post);
+
+        final data = json.decode(response.body);
+
+        var msg = "";
+        if (data['success']) {
+          final _user = data['data'];
+          if (_user['hasChild'].length > 0) {
+            hasChild = true;
+          }
+          hasFamily = true;
+        }
+      } catch (e) {}
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => UserInfoScreen(
-            user: user,
-          ),
+          builder: (context) => hasFamily
+              ? CreateChar(user: user)
+              : CreateFamily(
+                  user: user,
+                ),
         ),
       );
     }

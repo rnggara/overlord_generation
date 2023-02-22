@@ -1,31 +1,8 @@
-class UserModel {
-  String? uid;
+class UsrModel {
+  int id;
   String? name;
-  bool? presence;
-  int? lastSeenInEpoch;
+  String? email;
+  String? userImg;
 
-  UserModel({
-    required this.uid,
-    required this.name,
-    required this.presence,
-    required this.lastSeenInEpoch,
-  });
-
-  UserModel.fromJson(Map<String, dynamic> json) {
-    uid = json['uid'];
-    name = json['name'];
-    presence = json['presence'];
-    lastSeenInEpoch = json['last_seen'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-
-    data['uid'] = uid;
-    data['name'] = name;
-    data['presence'] = presence;
-    data['last_seen'] = lastSeenInEpoch;
-
-    return data;
-  }
+  UsrModel(this.id, this.name, this.email, this.userImg);
 }
