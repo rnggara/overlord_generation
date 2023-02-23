@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
 class Palette {
-  static const Color firebaseNavy = Color(0xFF2C384A);
-  static const Color firebaseOrange = Color(0xFFF57C00);
-  static const Color firebaseAmber = Color(0xFFFFA000);
-  static const Color firebaseYellow = Color(0xFFFFCA28);
-  static const Color firebaseGrey = Color(0xFFECEFF1);
-  static const Color googleBackground = Color(0xFF4285F4);
+  static const Color themeOrange = Color(0xFFF5491F);
+  static const Color themeYellow = Color(0xFFffb400);
+  static const Color themePrimary = Color(0xFF00a6ed);
+  static const Color themeGreen = Color(0xFF7fb800);
+  static const Color themeNavy = Color(0xFF0d2c54);
 }

@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:overlord_generation/activitiy/create_char.dart';
 import 'package:overlord_generation/models/profile.dart';
 import 'package:overlord_generation/res/values.dart';
 import 'package:overlord_generation/utils/authentication.dart';
@@ -57,6 +58,12 @@ class _CreateFamilyState extends State<CreateFamily> {
       } else {
         msg = data['message'];
       }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => CreateChar(user: widget._user),
+        ),
+      );
 
       setState(() {
         loading = false;

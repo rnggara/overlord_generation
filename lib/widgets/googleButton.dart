@@ -5,9 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlord_generation/activitiy/create_char.dart';
 import 'package:overlord_generation/activitiy/create_family.dart';
+import 'package:overlord_generation/activitiy/user_screen.dart';
 import 'package:overlord_generation/res/values.dart';
 import 'package:overlord_generation/utils/authentication.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GoogleSignInButton extends StatefulWidget {
   @override
@@ -57,6 +59,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
 
                   var hasChild = false;
                   var hasFamily = false;
+                  SharedPreferences pref =
+                      await SharedPreferences.getInstance();
 
                   try {
                     final response = await http.post(uri, body: _post);
@@ -65,28 +69,33 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
 
                     var msg = "";
                     if (data['success']) {
-                      final _user = data['data'];
-                      if (_user['hasChild'].length > 0) {
-                        hasChild = true;
-                      }
+                      final _data = data['data'];
+                      final _user = _data['user'];
+                      var _child = _data['char'];
                       hasFamily = true;
-                    }
+                      if (_child.length > 0) {
+                        hasChild = true;
+                        await pref.setString('uId', _user['id'].toString());
+                        await pref.setString('email', user.email.toString());
+                        await pref.setString(
+                            'charData', json.encode(_child).toString());
+                        await pref.setString(
+                            'userData', json.encode(_user).toString());
+                        await pref.setString('itemsData',
+                            json.encode(_data['items']).toString());
+                      } else {}
+                    } else {}
                   } catch (e) {}
 
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (context) => hasFamily
-                          ? CreateChar(user: user)
+                          ? hasChild
+                              ? UserScreen(pref: pref)
+                              : CreateChar(user: user)
                           : CreateFamily(
                               user: user,
                             ),
-                    ),
-                  );
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => CreateFamily(
-                        user: user,
-                      ),
                     ),
                   );
                 }

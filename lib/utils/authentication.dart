@@ -8,8 +8,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:overlord_generation/activitiy/create_char.dart';
 import 'package:overlord_generation/activitiy/create_family.dart';
+import 'package:overlord_generation/activitiy/user_screen.dart';
 import 'package:overlord_generation/res/values.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Authentication {
   static SnackBar customSnackBar({required String content}) {
@@ -38,6 +40,7 @@ class Authentication {
 
       var hasChild = false;
       var hasFamily = false;
+      SharedPreferences pref = await SharedPreferences.getInstance();
 
       try {
         final response = await http.post(uri, body: _post);
@@ -46,18 +49,28 @@ class Authentication {
 
         var msg = "";
         if (data['success']) {
-          final _user = data['data'];
-          if (_user['hasChild'].length > 0) {
-            hasChild = true;
-          }
+          final _data = data['data'];
+          final _user = _data['user'];
+          var _child = _data['char'];
+          var _items = _data['items'];
           hasFamily = true;
+          if (_child.length > 0) {
+            hasChild = true;
+            await pref.setString('uId', _user['id'].toString());
+            await pref.setString('email', user.email.toString());
+            await pref.setString('charData', json.encode(_child).toString());
+            await pref.setString('userData', json.encode(_user).toString());
+            await pref.setString('itemsData', json.encode(_items).toString());
+          }
         }
       } catch (e) {}
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => hasFamily
-              ? CreateChar(user: user)
+              ? hasChild
+                  ? UserScreen(pref: pref)
+                  : CreateChar(user: user)
               : CreateFamily(
                   user: user,
                 ),
