@@ -28,8 +28,61 @@ class _BagScreenState extends State<BagScreen> {
   List<String?> weapons = [];
   final controller = ScrollController();
 
+  List<dynamic> itemList = [];
+
   String? weaponImg = "";
   String? armorimg = "";
+
+  Future unequipItem(slot) async {
+    final uri = Uri.parse("$baseUri/og/unequip-item");
+
+    setState(() {
+      // loading = true;
+    });
+
+    final _post = {
+      "char": widget.char['id'].toString(),
+      "slot": slot.toString()
+    };
+
+    try {
+      final response = await http.post(uri, body: _post);
+
+      final data = json.decode(response.body);
+
+      var msg = "";
+      if (data['success']) {
+        final _data = data['data'];
+        SharedPreferences pref = await SharedPreferences.getInstance();
+        await pref.setString('charData', json.encode(_data).toString());
+        print("unequip");
+        await pref.reload();
+      } else {
+        print(data['message']);
+      }
+
+      showDialog(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+                title: Text("Unequiped"),
+                actions: [
+                  TextButton(
+                    onPressed: () async {
+                      await setEquip();
+                      Navigator.pop(context, 'OK');
+                    },
+                    child: const Text('OK'),
+                  )
+                ],
+              ));
+    } catch (e) {
+      setState(() {
+        // loading = false;
+        // errorMsg = "msg";
+      });
+      print("No Internet Connection 😱 $e");
+    }
+  }
 
   Future equipItem(item, slot) async {
     final uri = Uri.parse("$baseUri/og/equip-item");
@@ -55,6 +108,7 @@ class _BagScreenState extends State<BagScreen> {
         SharedPreferences pref = await SharedPreferences.getInstance();
         await pref.setString('charData', json.encode(_data).toString());
         await pref.reload();
+        setEquip();
       } else {
         print(data['message']);
       }
@@ -99,22 +153,61 @@ class _BagScreenState extends State<BagScreen> {
     // });
   }
 
-  setEquip() {
+  itemEquip(el, slot) {
+    var _title = slot == 1 ? "Weapons" : "Armors";
+    final itemSplit = el['pre_num'].toString().split("/");
+    final nameSplit = itemSplit[itemSplit.length - 1].toString().split(".");
+    final name = nameSplit[0];
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: Text("Equip $_title"),
+              content: Text("Equip $name"),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(context, 'Cancel'),
+                    child: Text("Cancel")),
+                TextButton(
+                    onPressed: () {
+                      setState(() {
+                        if (slot == 1) {
+                          weaponImg = el['pre_num'].toString();
+                        } else {
+                          armorimg = el['pre_num'].toString();
+                        }
+                        equipItem(el['id'], slot);
+                      });
+                      Navigator.pop(context, 'YES');
+                    },
+                    child: Text("Yes"))
+              ],
+            ));
+  }
+
+  setEquip() async {
+    itemList.clear();
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    var char = await json.decode(pref.getString('charData').toString())[0];
+    weaponImg = "";
+    armorimg = "";
     for (var i = 0; i < widget.items.length; i++) {
       var el = widget.items[i];
-      print(el['id'].toString() + " = " + widget.char['luck_1'].toString());
-      if (el['id'].toString() == widget.char['luck_1'].toString()) {
+      if (el['id'].toString() == char['luck_1'].toString()) {
         setState(() {
           weaponImg = el['pre_num'];
         });
-      }
-      if (el['id'].toString() == widget.char['luck_2'].toString()) {
+      } else if (el['id'].toString() == char['luck_2'].toString()) {
         setState(() {
           armorimg = el['pre_num'];
         });
+      } else {
+        print(el['id']);
+        setState(() {
+          itemList.add(el);
+        });
       }
     }
-    print(weaponImg);
   }
 
   @override
@@ -123,8 +216,6 @@ class _BagScreenState extends State<BagScreen> {
     getDir();
 
     setEquip();
-    print(widget.char['luck_1']);
-    print(weaponImg);
     super.initState();
   }
 
@@ -186,31 +277,51 @@ class _BagScreenState extends State<BagScreen> {
                                     SizedBox(
                                       height: 5,
                                     ),
-                                    DragTarget(
-                                      builder: (
-                                        BuildContext context,
-                                        List<dynamic> accepted,
-                                        List<dynamic> rejected,
-                                      ) {
-                                        return Container(
-                                          child: weaponImg == ""
-                                              ? Container()
-                                              : Container(
+                                    Container(
+                                      child: weaponImg == ""
+                                          ? Container()
+                                          : Container(
+                                              child: GestureDetector(
+                                                  onTap: () {
+                                                    showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                                context) =>
+                                                            AlertDialog(
+                                                              title: Text(
+                                                                  "Unequip Weapon"),
+                                                              actions: [
+                                                                TextButton(
+                                                                    onPressed: () =>
+                                                                        Navigator.pop(
+                                                                            context,
+                                                                            'Cancel'),
+                                                                    child: Text(
+                                                                        "Cancel")),
+                                                                TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      setState(
+                                                                          () {
+                                                                        weaponImg =
+                                                                            "";
+                                                                      });
+                                                                      unequipItem(
+                                                                          1);
+                                                                      Navigator.pop(
+                                                                          context,
+                                                                          'YES');
+                                                                    },
+                                                                    child: Text(
+                                                                        "Yes"))
+                                                              ],
+                                                            ));
+                                                  },
                                                   child: Image.asset(
                                                     weaponImg.toString(),
                                                     height: 70,
-                                                  ),
-                                                ),
-                                        );
-                                      },
-                                      onAccept: (data) {
-                                        setState(() {
-                                          final el = widget.items[
-                                              int.parse(data.toString())];
-                                          weaponImg = el['pre_num'].toString();
-                                          equipItem(el['id'], 1);
-                                        });
-                                      },
+                                                  )),
+                                            ),
                                     )
                                   ],
                                 ),
@@ -232,31 +343,51 @@ class _BagScreenState extends State<BagScreen> {
                                     SizedBox(
                                       height: 5,
                                     ),
-                                    DragTarget(
-                                      builder: (
-                                        BuildContext context,
-                                        List<dynamic> accepted,
-                                        List<dynamic> rejected,
-                                      ) {
-                                        return Container(
-                                          child: armorimg == ""
-                                              ? Container()
-                                              : Container(
+                                    Container(
+                                      child: armorimg == ""
+                                          ? Container()
+                                          : Container(
+                                              child: GestureDetector(
+                                                  onTap: () {
+                                                    showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                                context) =>
+                                                            AlertDialog(
+                                                              title: Text(
+                                                                  "Unequip Armor"),
+                                                              actions: [
+                                                                TextButton(
+                                                                    onPressed: () =>
+                                                                        Navigator.pop(
+                                                                            context,
+                                                                            'Cancel'),
+                                                                    child: Text(
+                                                                        "Cancel")),
+                                                                TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      setState(
+                                                                          () {
+                                                                        armorimg =
+                                                                            "";
+                                                                      });
+                                                                      unequipItem(
+                                                                          2);
+                                                                      Navigator.pop(
+                                                                          context,
+                                                                          'YES');
+                                                                    },
+                                                                    child: Text(
+                                                                        "Yes"))
+                                                              ],
+                                                            ));
+                                                  },
                                                   child: Image.asset(
                                                     armorimg.toString(),
                                                     height: 70,
-                                                  ),
-                                                ),
-                                        );
-                                      },
-                                      onAccept: (data) {
-                                        setState(() {
-                                          final el = widget.items[
-                                              int.parse(data.toString())];
-                                          armorimg = el['pre_num'].toString();
-                                          equipItem(el['id'], 2);
-                                        });
-                                      },
+                                                  )),
+                                            ),
                                     )
                                   ],
                                 ),
@@ -272,7 +403,7 @@ class _BagScreenState extends State<BagScreen> {
                                       height:
                                           MediaQuery.of(context).size.height,
                                       child: GridView.builder(
-                                        itemCount: widget.items.length,
+                                        itemCount: itemList.length,
                                         gridDelegate:
                                             SliverGridDelegateWithFixedCrossAxisCount(
                                                 childAspectRatio: 1.3,
@@ -281,30 +412,17 @@ class _BagScreenState extends State<BagScreen> {
                                                 mainAxisSpacing: 10),
                                         itemBuilder:
                                             (BuildContext context, int index) {
-                                          final el = widget.items[index];
-                                          final unequiped = weaponImg !=
-                                                  el['pre_num'].toString()
-                                              ? true
-                                              : false;
-                                          return unequiped
-                                              ? Draggable(
-                                                  data: index,
-                                                  feedback: Container(
-                                                    child: Image.asset(
-                                                      el['pre_num'],
-                                                      height: 80,
-                                                    ),
-                                                  ),
-                                                  child: Container(
-                                                    child: Image.asset(
-                                                      el['pre_num'],
-                                                      height: 20,
-                                                    ),
-                                                  ),
-                                                  childWhenDragging:
-                                                      Container(),
-                                                )
-                                              : Container();
+                                          final el = itemList[index];
+                                          return GestureDetector(
+                                              onTap: () {
+                                                itemEquip(el, el['pre_id']);
+                                              },
+                                              child: Container(
+                                                child: Image.asset(
+                                                  el['pre_num'],
+                                                  height: 20,
+                                                ),
+                                              ));
                                         },
                                       ))))
                         ],

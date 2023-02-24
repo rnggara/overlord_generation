@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:overlord_generation/activitiy/arena.dart';
 import 'package:overlord_generation/activitiy/bag.dart';
 import 'package:overlord_generation/activitiy/market.dart';
 import 'package:overlord_generation/activitiy/town.dart';
@@ -29,9 +31,46 @@ class _UserScreenState extends State<UserScreen> {
 
   var _town;
 
-  void changeContent(Material material) async {
+  void townContent() async {
+    widget.pref.reload();
+    _char = await json.decode(widget.pref.getString('charData').toString())[0];
+    _user = await json.decode(widget.pref.getString('userData').toString());
+    _items = await json.decode(widget.pref.getString('itemsData').toString());
     setState(() {
-      content = material;
+      content = TownScreen(
+        user: _user,
+        char: _char,
+        market: () {
+          setState(() {
+            content = MarketScreen(user: _user, char: _char);
+          });
+        },
+        arena: () {
+          setState(() {
+            content = ArenaScreen(user: _user, char: _char);
+          });
+        },
+      );
+    });
+  }
+
+  void toMarket() async {
+    widget.pref.reload();
+    _char = await json.decode(widget.pref.getString('charData').toString())[0];
+    _user = await json.decode(widget.pref.getString('userData').toString());
+    _items = await json.decode(widget.pref.getString('itemsData').toString());
+    setState(() {
+      MarketScreen(user: _user, char: _char);
+    });
+  }
+
+  void toArena() async {
+    widget.pref.reload();
+    _char = await json.decode(widget.pref.getString('charData').toString())[0];
+    _user = await json.decode(widget.pref.getString('userData').toString());
+    _items = await json.decode(widget.pref.getString('itemsData').toString());
+    setState(() {
+      ArenaScreen(user: _user, char: _char);
     });
   }
 
@@ -46,6 +85,11 @@ class _UserScreenState extends State<UserScreen> {
       market: () {
         setState(() {
           content = MarketScreen(user: _user, char: _char);
+        });
+      },
+      arena: () {
+        setState(() {
+          content = ArenaScreen(user: _user, char: _char);
         });
       },
     );
@@ -68,6 +112,15 @@ class _UserScreenState extends State<UserScreen> {
           appBar: AppBar(
             elevation: 0,
             backgroundColor: Palette.themeYellow,
+            leading: GestureDetector(
+              onTap: () async {
+                await widget.pref.reload();
+                setState(() {
+                  townContent();
+                });
+              },
+              child: Icon(CupertinoIcons.home),
+            ),
           ),
           body: Container(
             height: MediaQuery.of(context).size.height,
@@ -81,19 +134,11 @@ class _UserScreenState extends State<UserScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      GestureDetector(
-                        onTap: () async {
-                          await widget.pref.reload();
-                          setState(() {
-                            content = _town;
-                          });
-                        },
-                        child: ClipRect(
-                          child: Material(
-                            child: Image.asset(
-                              _char['bank_acct'].toString(),
-                              height: 100,
-                            ),
+                      ClipRect(
+                        child: Material(
+                          child: Image.asset(
+                            _char['bank_acct'].toString(),
+                            height: 100,
                           ),
                         ),
                       ),
@@ -121,7 +166,7 @@ class _UserScreenState extends State<UserScreen> {
                                 SizedBox(
                                   width: 5,
                                 ),
-                                Text(_user['do_code'] ?? "0",
+                                Text(_user['do_code'].toString(),
                                     style: TextStyle(
                                         fontFamily: "Montserrat",
                                         fontSize: 16,
@@ -156,11 +201,14 @@ class _UserScreenState extends State<UserScreen> {
                                 Map newChar = await json.decode(widget.pref
                                     .getString('charData')
                                     .toString())[0];
+                                List newItems = await json.decode(widget.pref
+                                    .getString('itemsData')
+                                    .toString());
                                 setState(() {
                                   content = BagScreen(
                                     user: _user,
                                     char: newChar,
-                                    items: _items,
+                                    items: newItems,
                                   );
                                 });
                               },

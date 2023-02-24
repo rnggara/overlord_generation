@@ -26,6 +26,9 @@ class _MarketScreenState extends State<MarketScreen> {
   List<String?> weapons = [];
   final controller = ScrollController();
 
+  String _dir = "Weapons";
+  int _slot = 1;
+
   Future postBuy(itemcode, price, img_uri) async {
     var id = widget.user['id'];
 
@@ -39,7 +42,8 @@ class _MarketScreenState extends State<MarketScreen> {
       "id": id.toString(),
       "item": itemcode,
       "price": price.toString(),
-      'img_uri': img_uri.toString()
+      'img_uri': img_uri.toString(),
+      'slot': _slot.toString()
     };
 
     try {
@@ -125,12 +129,17 @@ class _MarketScreenState extends State<MarketScreen> {
     // >> To get paths you need these 2 lines
 
     final imagePaths = manifestMap.keys
-        .where((String key) => key.contains('assets/images/items/Weapons'))
+        .where((String key) => key.contains('assets/images/items/$_dir'))
         // .where((String key) => key.contains('.svg'))
         .toList();
 
     setState(() {
       weapons = imagePaths;
+      if (_dir == "Others") {
+        _slot = 2;
+      } else {
+        _slot = 1;
+      }
     });
 
     // setState(() {
@@ -170,71 +179,148 @@ class _MarketScreenState extends State<MarketScreen> {
                   height: 20,
                 ),
                 Expanded(
-                  child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      color: Colors.white54,
-                      alignment: Alignment.center,
-                      child: ListView.builder(
-                        controller: controller,
-                        itemCount: weapons.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final item = weapons[index];
-                          final itemSplit = item.toString().split("/");
-                          final nameSplit = itemSplit[itemSplit.length - 1]
-                              .toString()
-                              .split(".");
-                          final name = nameSplit[0];
-                          return Padding(
-                            padding: EdgeInsets.only(top: 10, bottom: 10),
-                            child: ListTile(
-                              leading: Image.asset(
-                                item.toString(),
-                                height: 50,
-                              ),
-                              title: Container(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(name),
-                                    Row(
-                                      children: [
-                                        Image.asset(
-                                          'assets/images/icons/goldcoin.png',
-                                          height: 30,
-                                        ),
-                                        Text("5 g")
-                                      ],
-                                    ),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          primary: Palette.themePrimary),
-                                      onPressed: () async {
-                                        await buyItem(name, 5, item);
-                                      },
-                                      child: Padding(
-                                        padding: EdgeInsets.only(
-                                            top: 8.0, bottom: 8.0),
-                                        child: Text(
-                                          'BUY',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                            color: Colors.white54,
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.all(5),
+                              child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _dir = "Weapons";
+                                      getDir();
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                        color: _dir == "Weapons"
+                                            ? Palette.themePrimary
+                                            : Palette.themeNavy,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Center(
+                                      child: Text(
+                                        "Weapons",
+                                        style: TextStyle(
                                             fontFamily: "Montserrat",
-                                            letterSpacing: 2,
-                                          ),
+                                            color: Colors.white),
+                                      ),
+                                    ),
+                                  )),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(5),
+                              child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _dir = "Others";
+                                      getDir();
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                        color: _dir == "Others"
+                                            ? Palette.themePrimary
+                                            : Palette.themeNavy,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Center(
+                                      child: Text(
+                                        "Armors",
+                                        style: TextStyle(
+                                            fontFamily: "Montserrat",
+                                            color: Colors.white),
+                                      ),
+                                    ),
+                                  )),
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Expanded(
+                          child: Container(
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height,
+                              decoration: BoxDecoration(
+                                  color: Colors.white54,
+                                  borderRadius: BorderRadius.circular(10)),
+                              alignment: Alignment.center,
+                              child: Scrollbar(
+                                  child: ListView.builder(
+                                controller: controller,
+                                itemCount: weapons.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final item = weapons[index];
+                                  final itemSplit = item.toString().split("/");
+                                  final nameSplit =
+                                      itemSplit[itemSplit.length - 1]
+                                          .toString()
+                                          .split(".");
+                                  final name = nameSplit[0];
+                                  return Padding(
+                                    padding:
+                                        EdgeInsets.only(top: 10, bottom: 10),
+                                    child: ListTile(
+                                      leading: Image.asset(
+                                        item.toString(),
+                                        height: 50,
+                                      ),
+                                      title: Container(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(name),
+                                            Row(
+                                              children: [
+                                                Image.asset(
+                                                  'assets/images/icons/goldcoin.png',
+                                                  height: 30,
+                                                ),
+                                                Text("5 g")
+                                              ],
+                                            ),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                  primary:
+                                                      Palette.themePrimary),
+                                              onPressed: () async {
+                                                await buyItem(name, 5, item);
+                                              },
+                                              child: Padding(
+                                                padding: EdgeInsets.only(
+                                                    top: 8.0, bottom: 8.0),
+                                                child: Text(
+                                                  'BUY',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                    fontFamily: "Montserrat",
+                                                    letterSpacing: 2,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      )),
+                                  );
+                                },
+                              ))))
+                    ],
+                  ),
                 ),
               ],
             )));

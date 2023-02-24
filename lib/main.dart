@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:overlord_generation/activitiy/login_page.dart';
+import 'package:overlord_generation/res/customColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -70,9 +71,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Test Weather',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        brightness: Brightness.light,
-      ),
+          primarySwatch: Colors.blue,
+          brightness: Brightness.light,
+          scrollbarTheme: ScrollbarThemeData(
+              thickness: MaterialStateProperty.all(10),
+              thumbColor: MaterialStateProperty.all(Colors.blue),
+              radius: const Radius.circular(10),
+              minThumbLength: 100)),
       home: MyHomePage(title: 'Test Weather'),
     );
   }
@@ -133,6 +138,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: LoginPage(),
+      theme: ThemeData(
+          primarySwatch: Colors.blue,
+          brightness: Brightness.light,
+          scrollbarTheme: ScrollbarThemeData(
+              thickness: MaterialStateProperty.all(10),
+              thumbColor: MaterialStateProperty.all(Palette.themePrimary),
+              radius: const Radius.circular(10),
+              minThumbLength: 100)),
       debugShowCheckedModeBanner: false,
     );
   }

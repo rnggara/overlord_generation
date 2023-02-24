@@ -6,9 +6,13 @@ import 'package:overlord_generation/res/customColors.dart';
 class TownScreen extends StatefulWidget implements PreferredSizeWidget {
   final Map user;
   final Map char;
-  final Function()? market;
+  final Function()? market, arena;
   const TownScreen(
-      {Key? key, required this.user, required this.char, required this.market})
+      {Key? key,
+      required this.user,
+      required this.char,
+      required this.market,
+      required this.arena})
       : super(key: key);
 
   @override
@@ -20,6 +24,18 @@ class TownScreen extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _TownScreenState extends State<TownScreen> {
+  bool isPVP = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    if (widget.user['attend_code'] != null &&
+        int.parse(widget.user['attend_code'].toString()) >= 1) {
+      isPVP = true;
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return IntrinsicHeight(
@@ -97,7 +113,9 @@ class _TownScreenState extends State<TownScreen> {
                                   onTap: () {},
                                   child: Container(
                                     decoration: BoxDecoration(
-                                        color: Palette.themeOrange,
+                                        color: isPVP
+                                            ? Colors.grey
+                                            : Palette.themeOrange,
                                         borderRadius:
                                             BorderRadius.circular(10)),
                                     padding: EdgeInsets.only(
@@ -138,7 +156,7 @@ class _TownScreenState extends State<TownScreen> {
                           Padding(
                             padding: EdgeInsets.all(5),
                             child: GestureDetector(
-                                onTap: () {},
+                                onTap: widget.arena,
                                 child: Container(
                                   decoration: BoxDecoration(
                                       color: Palette.themePrimary,
@@ -173,7 +191,9 @@ class _TownScreenState extends State<TownScreen> {
                                 onTap: () {},
                                 child: Container(
                                   decoration: BoxDecoration(
-                                      color: Palette.themeGreen,
+                                      color: isPVP
+                                          ? Colors.grey
+                                          : Palette.themeGreen,
                                       borderRadius: BorderRadius.circular(10)),
                                   padding: EdgeInsets.only(
                                       left: 10, right: 10, top: 16, bottom: 16),
