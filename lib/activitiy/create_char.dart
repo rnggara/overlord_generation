@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -100,6 +99,7 @@ class _CreateCharState extends State<CreateChar> {
         pref.setString('charId', _char['id'].toString());
         pref.setString('charData', json.encode(_char).toString());
         pref.setString('userData', json.encode(_uData).toString());
+        pref.setString('itemsData', json.encode([]).toString());
 
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
