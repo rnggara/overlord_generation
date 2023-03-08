@@ -66,7 +66,11 @@ class _UserScreenState extends State<UserScreen> {
         },
         practice: () {
           setState(() {
-            content = PracticeScreen(user: _user, char: _char);
+            content = PracticeScreen(
+              user: _user,
+              char: _char,
+              callback: initProfile,
+            );
           });
         },
       );

@@ -11,7 +11,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PracticeScreen extends StatefulWidget implements PreferredSizeWidget {
   final Map user;
   final Map char;
-  const PracticeScreen({Key? key, required this.user, required this.char})
+  final VoidCallback callback;
+  const PracticeScreen(
+      {Key? key,
+      required this.user,
+      required this.char,
+      required this.callback})
       : super(key: key);
 
   @override
@@ -67,6 +72,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
           pref.setString('userData', json.encode(_uData).toString());
           pref.setString('itemsData', json.encode(_items).toString());
           // var newGold = _data['do_code'];
+          widget.callback();
         }
 
         showDialog(
