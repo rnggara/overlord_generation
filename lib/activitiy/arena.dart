@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:overlord_generation/res/customColors.dart';
 import 'package:http/http.dart' as http;
 import 'package:overlord_generation/res/values.dart';
@@ -11,7 +12,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ArenaScreen extends StatefulWidget implements PreferredSizeWidget {
   final Map user;
   final Map char;
-  const ArenaScreen({Key? key, required this.user, required this.char})
+  final VoidCallback callback;
+  const ArenaScreen(
+      {Key? key,
+      required this.user,
+      required this.char,
+      required this.callback})
       : super(key: key);
 
   @override
@@ -25,12 +31,81 @@ class ArenaScreen extends StatefulWidget implements PreferredSizeWidget {
 class _ArenaScreenState extends State<ArenaScreen> {
   final controller = ScrollController();
 
-  Map _user = {};
+  Map<dynamic, dynamic> _user = {};
 
   bool isPVP = false;
+  bool isPVPDone = false;
   bool isAble = true;
 
+  bool loadState = false;
+  bool isWin = false;
+
+  String msgResult = "";
+
   int entry = 10;
+
+  Future getArenaResult() async {
+    final uri = Uri.parse("$baseUri/og/arena-result");
+
+    final _post = {
+      "id": _user['id'].toString(),
+      "char": widget.char['id'].toString(),
+    };
+
+    try {
+      final response = await http.post(uri, body: _post);
+
+      final data = json.decode(response.body);
+
+      var msg = "Sorry, you lost the duel. Claim back your entry fee (10g)";
+      if (data['success']) {
+        if (data['data']) {
+          msg = "Congratulation, you won the duel. Claim your prize (20g)";
+          setState(() {
+            isWin = true;
+          });
+        }
+      } else {
+        print(data['message']);
+      }
+
+      setState(() {
+        loadState = false;
+        msgResult = msg;
+      });
+    } catch (e) {}
+  }
+
+  Future claimArena() async {
+    final uri = Uri.parse("$baseUri/og/claim-arena");
+
+    final _post = {"id": _user['id'].toString(), "win": isWin.toString()};
+
+    try {
+      final response = await http.post(uri, body: _post);
+
+      final data = json.decode(response.body);
+      print(data);
+      if (data['success']) {
+        final _data = data['data'];
+        SharedPreferences pref = await SharedPreferences.getInstance();
+        await pref.setString('userData', json.encode(_data).toString());
+        await pref.reload();
+        widget.callback();
+        setState(() {
+          _user = _data;
+        });
+      } else {
+        print(data['message']);
+      }
+    } catch (e) {
+      print("error log : ${e.toString()}");
+    }
+    setState(() {
+      checkStatus(_user);
+      loadState = false;
+    });
+  }
 
   Future enterArena() async {
     final uri = Uri.parse("$baseUri/og/join-arena");
@@ -55,6 +130,7 @@ class _ArenaScreenState extends State<ArenaScreen> {
         SharedPreferences pref = await SharedPreferences.getInstance();
         await pref.setString('userData', json.encode(_data).toString());
         await pref.reload();
+        widget.callback();
       } else {
         print(data['message']);
       }
@@ -66,7 +142,7 @@ class _ArenaScreenState extends State<ArenaScreen> {
       showDialog(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-                title: Text("Equiped"),
+                title: Text("Success"),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, 'OK'),
@@ -83,20 +159,36 @@ class _ArenaScreenState extends State<ArenaScreen> {
     }
   }
 
-  checkStatus() async {
-    if (_user['attend_code'] >= 1) {
+  checkStatus(p1) {
+    if (p1['attend_code'] != null && p1['attend_code'] >= 1) {
       isPVP = true;
+      if (p1['attend_code'] == 2) {
+        isPVPDone = true;
+      }
+    } else {
+      isPVP = false;
+      isPVPDone = false;
     }
 
-    if (int.parse(_user['do_code']) < entry) {
-      isAble = false;
+    try {
+      if (int.parse(p1['do_code']) < entry) {
+        isAble = false;
+      } else {
+        isAble = true;
+      }
+    } catch (e) {
+      if (p1['do_code'] < entry) {
+        isAble = false;
+      } else {
+        isAble = true;
+      }
     }
   }
 
   @override
   void initState() {
     _user = widget.user;
-    checkStatus();
+    checkStatus(_user);
     // TODO: implement initState
     super.initState();
   }
@@ -203,11 +295,54 @@ class _ArenaScreenState extends State<ArenaScreen> {
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                   primary: isPVP
-                                      ? Palette.themeYellow
+                                      ? isPVPDone
+                                          ? Palette.themeOrange
+                                          : Palette.themeYellow
                                       : Palette.themePrimary,
                                   minimumSize: const Size.fromHeight(30)),
                               onPressed: isPVP
-                                  ? () {}
+                                  ? !isPVPDone
+                                      ? () {}
+                                      : loadState
+                                          ? null
+                                          : () async {
+                                              setState(() {
+                                                loadState = true;
+                                              });
+                                              await getArenaResult();
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext
+                                                          context) =>
+                                                      AlertDialog(
+                                                        title: Text(
+                                                            "Arena Result"),
+                                                        content: loadState
+                                                            ? SpinKitFadingCircle(
+                                                                color: Colors
+                                                                    .black38,
+                                                              )
+                                                            : Flexible(
+                                                                child: Text(
+                                                                    "$msgResult",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontFamily:
+                                                                            "Montserrat"))),
+                                                        actions: [
+                                                          TextButton(
+                                                              onPressed: () {
+                                                                claimArena();
+                                                                Navigator.pop(
+                                                                    context,
+                                                                    "Claim");
+                                                              },
+                                                              child:
+                                                                  Text("Claim"))
+                                                        ],
+                                                      ));
+                                            }
                                   : () {
                                       showDialog(
                                           context: context,
@@ -244,7 +379,9 @@ class _ArenaScreenState extends State<ArenaScreen> {
                                       EdgeInsets.only(top: 8.0, bottom: 8.0),
                                   child: Text(
                                     isPVP
-                                        ? "Waiting for challenger"
+                                        ? isPVPDone
+                                            ? "See the result!"
+                                            : "Waiting for challenger"
                                         : "I would like to enter the arena",
                                     style: TextStyle(
                                         fontSize: 16,

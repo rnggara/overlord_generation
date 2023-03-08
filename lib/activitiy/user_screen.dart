@@ -3,12 +3,15 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:overlord_generation/activitiy/arena.dart';
 import 'package:overlord_generation/activitiy/bag.dart';
 import 'package:overlord_generation/activitiy/market.dart';
+import 'package:overlord_generation/activitiy/practice.dart';
 import 'package:overlord_generation/activitiy/town.dart';
 import 'package:overlord_generation/models/profile.dart';
 import 'package:overlord_generation/res/customColors.dart';
+import 'package:overlord_generation/res/values.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserScreen extends StatefulWidget {
@@ -27,9 +30,11 @@ class _UserScreenState extends State<UserScreen> {
   Map<dynamic, dynamic> _user = {};
   List<dynamic> _items = [];
 
-  var content;
+  String? gold, age;
 
-  var _town;
+  bool loading = true;
+
+  var content;
 
   void townContent() async {
     widget.pref.reload();
@@ -37,40 +42,46 @@ class _UserScreenState extends State<UserScreen> {
     _user = await json.decode(widget.pref.getString('userData').toString());
     _items = await json.decode(widget.pref.getString('itemsData').toString());
     setState(() {
+      loading = false;
       content = TownScreen(
         user: _user,
         char: _char,
         market: () {
           setState(() {
-            content = MarketScreen(user: _user, char: _char);
+            content = MarketScreen(
+              user: _user,
+              char: _char,
+              callback: initProfile,
+            );
           });
         },
         arena: () {
           setState(() {
-            content = ArenaScreen(user: _user, char: _char);
+            content = ArenaScreen(
+              user: _user,
+              char: _char,
+              callback: initProfile,
+            );
+          });
+        },
+        practice: () {
+          setState(() {
+            content = PracticeScreen(user: _user, char: _char);
           });
         },
       );
+      initProfile();
     });
   }
 
-  void toMarket() async {
+  Future initProfile() async {
+    print("init profile");
     widget.pref.reload();
     _char = await json.decode(widget.pref.getString('charData').toString())[0];
     _user = await json.decode(widget.pref.getString('userData').toString());
-    _items = await json.decode(widget.pref.getString('itemsData').toString());
     setState(() {
-      MarketScreen(user: _user, char: _char);
-    });
-  }
-
-  void toArena() async {
-    widget.pref.reload();
-    _char = await json.decode(widget.pref.getString('charData').toString())[0];
-    _user = await json.decode(widget.pref.getString('userData').toString());
-    _items = await json.decode(widget.pref.getString('itemsData').toString());
-    setState(() {
-      ArenaScreen(user: _user, char: _char);
+      gold = _user['do_code'].toString();
+      age = _char['t_age_current'].toString();
     });
   }
 
@@ -79,37 +90,22 @@ class _UserScreenState extends State<UserScreen> {
     _char = json.decode(widget.pref.getString('charData').toString())[0];
     _user = json.decode(widget.pref.getString('userData').toString());
     _items = json.decode(widget.pref.getString('itemsData').toString());
-    content = TownScreen(
-      user: _user,
-      char: _char,
-      market: () {
-        setState(() {
-          content = MarketScreen(user: _user, char: _char);
-        });
-      },
-      arena: () {
-        setState(() {
-          content = ArenaScreen(user: _user, char: _char);
-        });
-      },
-    );
-
-    _town = content;
+    townContent();
+    initProfile();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-
     return Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             image: DecorationImage(
                 image: AssetImage('assets/images/bg/town.png'),
                 fit: BoxFit.cover)),
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
+            toolbarHeight: 40,
             elevation: 0,
             backgroundColor: Palette.themeYellow,
             leading: GestureDetector(
@@ -122,19 +118,21 @@ class _UserScreenState extends State<UserScreen> {
               child: Icon(CupertinoIcons.home),
             ),
           ),
-          body: Container(
+          body: SizedBox(
             height: MediaQuery.of(context).size.height,
-            child: Column(
+            child: Expanded(
+                child: Column(
               children: [
                 Container(
                   padding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
-                  height: MediaQuery.of(context).size.height * .16,
+                  height: MediaQuery.of(context).size.height * .19,
                   decoration: BoxDecoration(color: Palette.themeYellow),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      ClipRect(
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
                         child: Material(
                           child: Image.asset(
                             _char['bank_acct'].toString(),
@@ -149,7 +147,7 @@ class _UserScreenState extends State<UserScreen> {
                             .replaceAll(" ", "\n"),
                         style: TextStyle(
                             fontFamily: "Montserrat",
-                            fontSize: 16,
+                            fontSize: fontLg,
                             color: Colors.white),
                       ),
                       Container(
@@ -166,10 +164,10 @@ class _UserScreenState extends State<UserScreen> {
                                 SizedBox(
                                   width: 5,
                                 ),
-                                Text(_user['do_code'].toString(),
+                                Text("$gold",
                                     style: TextStyle(
                                         fontFamily: "Montserrat",
-                                        fontSize: 16,
+                                        fontSize: fontSm,
                                         color: Colors.white))
                               ],
                             ),
@@ -185,10 +183,10 @@ class _UserScreenState extends State<UserScreen> {
                                 SizedBox(
                                   width: 5,
                                 ),
-                                Text((_char['t_age_current'] ?? "1") + " yo",
+                                Text((age ?? "1") + " yo",
                                     style: TextStyle(
                                         fontFamily: "Montserrat",
-                                        fontSize: 16,
+                                        fontSize: fontSm,
                                         color: Colors.white))
                               ],
                             ),
@@ -224,7 +222,7 @@ class _UserScreenState extends State<UserScreen> {
                                   Text("Bag",
                                       style: TextStyle(
                                           fontFamily: "Montserrat",
-                                          fontSize: 16,
+                                          fontSize: fontSm,
                                           color: Colors.white))
                                 ],
                               ),
@@ -235,9 +233,13 @@ class _UserScreenState extends State<UserScreen> {
                     ],
                   ),
                 ),
-                content
+                loading
+                    ? SpinKitFadingCircle(
+                        color: Colors.white,
+                      )
+                    : content
               ],
-            ),
+            )),
           ),
         ));
   }

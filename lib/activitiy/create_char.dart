@@ -82,6 +82,8 @@ class _CreateCharState extends State<CreateChar> {
       "image": char_img
     };
 
+    print(_post);
+
     try {
       final response = await http.post(uri, body: _post);
 
@@ -96,7 +98,7 @@ class _CreateCharState extends State<CreateChar> {
         pref.setString('uId', _uData['id'].toString());
         pref.setString('email', email.toString());
         pref.setString('imageChar', char_img.toString());
-        pref.setString('charId', _char['id'].toString());
+        pref.setString('charId', _char[0]['id'].toString());
         pref.setString('charData', json.encode(_char).toString());
         pref.setString('userData', json.encode(_uData).toString());
         pref.setString('itemsData', json.encode([]).toString());

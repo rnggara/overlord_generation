@@ -126,7 +126,6 @@ class _MyHomePageState extends State<MyHomePage> {
     FirebaseMessaging _firebaseMessaging =
         FirebaseMessaging.instance; // Change here
     _firebaseMessaging.getToken().then((token) {
-      print("token is $token");
       store_id(token);
     });
 

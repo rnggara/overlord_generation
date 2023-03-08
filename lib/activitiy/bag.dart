@@ -232,7 +232,10 @@ class _BagScreenState extends State<BagScreen> {
                 Container(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height * .07,
-                  color: Colors.white54,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white54,
+                  ),
                   alignment: Alignment.center,
                   child: Text(
                     "Bag",
@@ -240,7 +243,7 @@ class _BagScreenState extends State<BagScreen> {
                         color: Palette.themePrimary,
                         fontFamily: "Montserrat",
                         fontWeight: FontWeight.bold,
-                        fontSize: 30),
+                        fontSize: fontXl),
                   ),
                 ),
                 SizedBox(

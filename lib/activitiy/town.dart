@@ -2,16 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:overlord_generation/activitiy/user_screen.dart';
 import 'package:overlord_generation/res/customColors.dart';
+import 'package:overlord_generation/res/values.dart';
 
 class TownScreen extends StatefulWidget implements PreferredSizeWidget {
   final Map user;
   final Map char;
-  final Function()? market, arena;
+  final Function()? market, arena, practice;
   const TownScreen(
       {Key? key,
       required this.user,
       required this.char,
       required this.market,
+      required this.practice,
       required this.arena})
       : super(key: key);
 
@@ -46,7 +48,10 @@ class _TownScreenState extends State<TownScreen> {
                 Container(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height * .07,
-                  color: Colors.white54,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white54,
+                  ),
                   alignment: Alignment.center,
                   child: Text(
                     "Town",
@@ -54,15 +59,18 @@ class _TownScreenState extends State<TownScreen> {
                         color: Palette.themePrimary,
                         fontFamily: "Montserrat",
                         fontWeight: FontWeight.bold,
-                        fontSize: 30),
+                        fontSize: fontXl),
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: 15,
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width,
-                  color: Colors.white54,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white54,
+                  ),
                   alignment: Alignment.center,
                   child: Column(
                     children: [
@@ -71,7 +79,7 @@ class _TownScreenState extends State<TownScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Padding(
-                              padding: EdgeInsets.all(5),
+                              padding: EdgeInsets.all(10),
                               child: GestureDetector(
                                   onTap: widget.market,
                                   child: Container(
@@ -92,7 +100,7 @@ class _TownScreenState extends State<TownScreen> {
                                           "Market",
                                           style: TextStyle(
                                               color: Colors.white,
-                                              fontSize: 18,
+                                              fontSize: fontLg,
                                               fontWeight: FontWeight.bold,
                                               fontFamily: "Montserrat"),
                                         ),
@@ -100,6 +108,7 @@ class _TownScreenState extends State<TownScreen> {
                                           "Buy anything\nyou need here",
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
+                                              fontSize: fontSm,
                                               color: Colors.white,
                                               fontFamily: "Montserrat"),
                                         ),
@@ -108,7 +117,7 @@ class _TownScreenState extends State<TownScreen> {
                                   )),
                             ),
                             Padding(
-                              padding: EdgeInsets.all(5),
+                              padding: EdgeInsets.all(10),
                               child: GestureDetector(
                                   onTap: () {},
                                   child: Container(
@@ -131,7 +140,7 @@ class _TownScreenState extends State<TownScreen> {
                                           "Dungeon",
                                           style: TextStyle(
                                               color: Colors.white,
-                                              fontSize: 18,
+                                              fontSize: fontLg,
                                               fontWeight: FontWeight.bold,
                                               fontFamily: "Montserrat"),
                                         ),
@@ -140,6 +149,7 @@ class _TownScreenState extends State<TownScreen> {
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                               color: Colors.white,
+                                              fontSize: fontSm,
                                               fontFamily: "Montserrat"),
                                         ),
                                       ],
@@ -154,7 +164,7 @@ class _TownScreenState extends State<TownScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Padding(
-                            padding: EdgeInsets.all(5),
+                            padding: EdgeInsets.all(10),
                             child: GestureDetector(
                                 onTap: widget.arena,
                                 child: Container(
@@ -170,7 +180,7 @@ class _TownScreenState extends State<TownScreen> {
                                         "Arena",
                                         style: TextStyle(
                                             color: Colors.white,
-                                            fontSize: 18,
+                                            fontSize: fontLg,
                                             fontWeight: FontWeight.bold,
                                             fontFamily: "Montserrat"),
                                       ),
@@ -179,6 +189,7 @@ class _TownScreenState extends State<TownScreen> {
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                             color: Colors.white,
+                                            fontSize: fontSm,
                                             fontFamily: "Montserrat"),
                                       ),
                                     ],
@@ -186,9 +197,9 @@ class _TownScreenState extends State<TownScreen> {
                                 )),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(5),
+                            padding: EdgeInsets.all(10),
                             child: GestureDetector(
-                                onTap: () {},
+                                onTap: widget.practice,
                                 child: Container(
                                   decoration: BoxDecoration(
                                       color: isPVP
@@ -204,7 +215,7 @@ class _TownScreenState extends State<TownScreen> {
                                         "Practice",
                                         style: TextStyle(
                                             color: Colors.white,
-                                            fontSize: 18,
+                                            fontSize: fontLg,
                                             fontWeight: FontWeight.bold,
                                             fontFamily: "Montserrat"),
                                       ),
@@ -213,6 +224,7 @@ class _TownScreenState extends State<TownScreen> {
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                             color: Colors.white,
+                                            fontSize: fontSm,
                                             fontFamily: "Montserrat"),
                                       ),
                                     ],
@@ -221,9 +233,6 @@ class _TownScreenState extends State<TownScreen> {
                           ),
                         ],
                       )),
-                      SizedBox(
-                        height: 10,
-                      ),
                       Column(
                         children: [
                           Text(
@@ -243,7 +252,7 @@ class _TownScreenState extends State<TownScreen> {
                                       children: [
                                         Image.asset(
                                           "assets/images/icons/intelligence.png",
-                                          height: 25,
+                                          height: 20,
                                         ),
                                         SizedBox(
                                           width: 5,
@@ -253,7 +262,7 @@ class _TownScreenState extends State<TownScreen> {
                                               widget.char['t_int'].toString(),
                                           style: TextStyle(
                                               fontFamily: "Montserrat",
-                                              fontSize: 16),
+                                              fontSize: fontLg),
                                         )
                                       ],
                                     ),
@@ -261,7 +270,7 @@ class _TownScreenState extends State<TownScreen> {
                                       children: [
                                         Image.asset(
                                           "assets/images/icons/strength.png",
-                                          height: 25,
+                                          height: 20,
                                         ),
                                         SizedBox(
                                           width: 5,
@@ -271,7 +280,7 @@ class _TownScreenState extends State<TownScreen> {
                                               widget.char['t_str'].toString(),
                                           style: TextStyle(
                                               fontFamily: "Montserrat",
-                                              fontSize: 16),
+                                              fontSize: fontMd),
                                         )
                                       ],
                                     )
@@ -288,7 +297,7 @@ class _TownScreenState extends State<TownScreen> {
                                       children: [
                                         Image.asset(
                                           "assets/images/icons/vitality.png",
-                                          height: 25,
+                                          height: 20,
                                         ),
                                         SizedBox(
                                           width: 5,
@@ -298,7 +307,7 @@ class _TownScreenState extends State<TownScreen> {
                                               widget.char['t_hp'].toString(),
                                           style: TextStyle(
                                               fontFamily: "Montserrat",
-                                              fontSize: 16),
+                                              fontSize: fontMd),
                                         )
                                       ],
                                     ),
@@ -306,7 +315,7 @@ class _TownScreenState extends State<TownScreen> {
                                       children: [
                                         Image.asset(
                                           "assets/images/icons/dexterity.png",
-                                          height: 25,
+                                          height: 20,
                                         ),
                                         SizedBox(
                                           width: 5,
@@ -316,7 +325,7 @@ class _TownScreenState extends State<TownScreen> {
                                               widget.char['t_dex'].toString(),
                                           style: TextStyle(
                                               fontFamily: "Montserrat",
-                                              fontSize: 16),
+                                              fontSize: fontMd),
                                         )
                                       ],
                                     )
@@ -333,7 +342,7 @@ class _TownScreenState extends State<TownScreen> {
                                       children: [
                                         Image.asset(
                                           "assets/images/icons/agility.png",
-                                          height: 25,
+                                          height: 20,
                                         ),
                                         SizedBox(
                                           width: 5,
@@ -343,7 +352,7 @@ class _TownScreenState extends State<TownScreen> {
                                               widget.char['t_agi'].toString(),
                                           style: TextStyle(
                                               fontFamily: "Montserrat",
-                                              fontSize: 16),
+                                              fontSize: fontMd),
                                         )
                                       ],
                                     ),
@@ -351,7 +360,7 @@ class _TownScreenState extends State<TownScreen> {
                                       children: [
                                         Image.asset(
                                           "assets/images/icons/luck.png",
-                                          height: 25,
+                                          height: 20,
                                         ),
                                         SizedBox(
                                           width: 5,
@@ -361,7 +370,7 @@ class _TownScreenState extends State<TownScreen> {
                                               widget.char['t_def'].toString(),
                                           style: TextStyle(
                                               fontFamily: "Montserrat",
-                                              fontSize: 16),
+                                              fontSize: fontMd),
                                         )
                                       ],
                                     )

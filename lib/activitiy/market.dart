@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MarketScreen extends StatefulWidget implements PreferredSizeWidget {
   final Map user;
   final Map char;
-  const MarketScreen({Key? key, required this.user, required this.char})
+  final VoidCallback callback;
+  const MarketScreen(
+      {Key? key,
+      required this.user,
+      required this.char,
+      required this.callback})
       : super(key: key);
 
   @override
@@ -59,7 +65,7 @@ class _MarketScreenState extends State<MarketScreen> {
         SharedPreferences pref = await SharedPreferences.getInstance();
         pref.setString('userData', json.encode(_uData).toString());
         pref.setString('itemsData', json.encode(_items).toString());
-        var newGold = _data['do_code'];
+        widget.callback();
       }
 
       showDialog(
@@ -84,7 +90,12 @@ class _MarketScreenState extends State<MarketScreen> {
 
   Future buyItem(itemcode, price, uri) async {
     final user = widget.user;
-    var balance = int.parse(user['do_code']);
+    var balance = 0;
+    try {
+      balance = int.parse(user['do_code']);
+    } catch (e) {
+      balance = user['do_code'];
+    }
     var buyState = true;
     if (balance < price) {
       buyState = false;
@@ -164,7 +175,10 @@ class _MarketScreenState extends State<MarketScreen> {
                 Container(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height * .07,
-                  color: Colors.white54,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white54,
+                  ),
                   alignment: Alignment.center,
                   child: Text(
                     "Market",
@@ -172,11 +186,11 @@ class _MarketScreenState extends State<MarketScreen> {
                         color: Palette.themePrimary,
                         fontFamily: "Montserrat",
                         fontWeight: FontWeight.bold,
-                        fontSize: 30),
+                        fontSize: fontXl),
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: 5,
                 ),
                 Expanded(
                   child: Column(
@@ -303,7 +317,7 @@ class _MarketScreenState extends State<MarketScreen> {
                                                 child: Text(
                                                   'BUY',
                                                   style: TextStyle(
-                                                    fontSize: 16,
+                                                    fontSize: fontLg,
                                                     fontWeight: FontWeight.bold,
                                                     color: Colors.white,
                                                     fontFamily: "Montserrat",

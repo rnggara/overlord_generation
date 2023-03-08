@@ -16,18 +16,11 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _state = true;
 
-  ProfileUpdate _profileUpdate = new ProfileUpdate();
-
   Profile? profile;
-
-  Future getProfile() async {
-    profile = await _profileUpdate.getProfile();
-  }
 
   @override
   void initState() {
     super.initState();
-    getProfile();
     // profile.then((String value) {
     //   print(value);
     // });
