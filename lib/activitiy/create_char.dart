@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -74,7 +75,18 @@ class _CreateCharState extends State<CreateChar> {
       loading = true;
     });
 
-    final _post = {
+    getDir(imgDir);
+
+    final random = Random();
+
+    const min = 0;
+    final max = imgSel.length;
+
+    final ind = min + random.nextInt(max - min);
+
+    char_img = imgSel[ind];
+
+    final postData = {
       "name": first_name.text.toString(),
       "email": email,
       "gender": genderSel,
@@ -82,14 +94,11 @@ class _CreateCharState extends State<CreateChar> {
       "image": char_img
     };
 
-    print(_post);
-
     try {
-      final response = await http.post(uri, body: _post);
+      final response = await http.post(uri, body: postData);
 
       final data = json.decode(response.body);
 
-      var msg = "";
       if (data['success']) {
         final _data = data['data'];
         final _uData = _data['user'];
@@ -139,7 +148,7 @@ class _CreateCharState extends State<CreateChar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             image: DecorationImage(
                 image: AssetImage('assets/images/bg/login.png'),
                 fit: BoxFit.cover)),
@@ -147,7 +156,7 @@ class _CreateCharState extends State<CreateChar> {
           child: Scaffold(
               backgroundColor: Colors.transparent,
               appBar: PreferredSize(
-                preferredSize: Size.fromHeight(10),
+                preferredSize: const Size.fromHeight(10),
                 child: AppBar(
                   elevation: 0,
                   backgroundColor: Colors.transparent,
@@ -205,9 +214,7 @@ class _CreateCharState extends State<CreateChar> {
                                     controller: first_name,
                                     onChanged: (value) {
                                       setState(() {
-                                        if (value != "" &&
-                                            char_img !=
-                                                "assets/images/characters/default.jpg") {
+                                        if (value != "") {
                                           state = true;
                                         }
                                       });
@@ -306,87 +313,86 @@ class _CreateCharState extends State<CreateChar> {
                                   SizedBox(
                                     height: 40,
                                   ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Select image\n(tap to change)",
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.normal,
-                                            fontFamily: "Montserrat"),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          getDir(imgDir);
-                                          print(imgSel);
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) =>
-                                                  AlertDialog(
-                                                    title: Text("Select Image"),
-                                                    content: Container(
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              .8,
-                                                      child: GridView.builder(
-                                                        gridDelegate:
-                                                            SliverGridDelegateWithFixedCrossAxisCount(
-                                                                crossAxisSpacing:
-                                                                    5,
-                                                                mainAxisSpacing:
-                                                                    5,
-                                                                crossAxisCount:
-                                                                    2),
-                                                        itemCount:
-                                                            imgSel.length,
-                                                        itemBuilder:
-                                                            (context, index) {
-                                                          final item =
-                                                              imgSel[index];
-                                                          return GestureDetector(
-                                                            onTap: () {
-                                                              setState(() {
-                                                                char_img =
-                                                                    '$item';
-                                                                if (first_name
-                                                                        .text !=
-                                                                    "") {
-                                                                  state = true;
-                                                                }
-                                                              });
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
-                                                            child: ClipRect(
-                                                                child: Material(
-                                                                    child: Image
-                                                                        .asset(
-                                                              '$item',
-                                                              width: 20,
-                                                            ))),
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ));
-                                        },
-                                        child: ClipRect(
-                                          child: Material(
-                                            child: Image.asset(
-                                              char_img.toString(),
-                                              width: 100,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  )
+                                  // Row(
+                                  //   mainAxisAlignment:
+                                  //       MainAxisAlignment.spaceBetween,
+                                  //   children: [
+                                  //     Text(
+                                  //       "Select image\n(tap to change)",
+                                  //       textAlign: TextAlign.start,
+                                  //       style: TextStyle(
+                                  //           color: Colors.black,
+                                  //           fontSize: 16,
+                                  //           fontWeight: FontWeight.normal,
+                                  //           fontFamily: "Montserrat"),
+                                  //     ),
+                                  //     GestureDetector(
+                                  //       onTap: () {
+                                  //         getDir(imgDir);
+                                  //         showDialog(
+                                  //             context: context,
+                                  //             builder: (BuildContext context) =>
+                                  //                 AlertDialog(
+                                  //                   title: Text("Select Image"),
+                                  //                   content: Container(
+                                  //                     width:
+                                  //                         MediaQuery.of(context)
+                                  //                                 .size
+                                  //                                 .width *
+                                  //                             .8,
+                                  //                     child: GridView.builder(
+                                  //                       gridDelegate:
+                                  //                           SliverGridDelegateWithFixedCrossAxisCount(
+                                  //                               crossAxisSpacing:
+                                  //                                   5,
+                                  //                               mainAxisSpacing:
+                                  //                                   5,
+                                  //                               crossAxisCount:
+                                  //                                   2),
+                                  //                       itemCount:
+                                  //                           imgSel.length,
+                                  //                       itemBuilder:
+                                  //                           (context, index) {
+                                  //                         final item =
+                                  //                             imgSel[index];
+                                  //                         return GestureDetector(
+                                  //                           onTap: () {
+                                  //                             setState(() {
+                                  //                               char_img =
+                                  //                                   '$item';
+                                  //                               if (first_name
+                                  //                                       .text !=
+                                  //                                   "") {
+                                  //                                 state = true;
+                                  //                               }
+                                  //                             });
+                                  //                             Navigator.pop(
+                                  //                                 context);
+                                  //                           },
+                                  //                           child: ClipRect(
+                                  //                               child: Material(
+                                  //                                   child: Image
+                                  //                                       .asset(
+                                  //                             '$item',
+                                  //                             width: 20,
+                                  //                           ))),
+                                  //                         );
+                                  //                       },
+                                  //                     ),
+                                  //                   ),
+                                  //                 ));
+                                  //       },
+                                  //       child: ClipRect(
+                                  //         child: Material(
+                                  //           child: Image.asset(
+                                  //             char_img.toString(),
+                                  //             width: 100,
+                                  //           ),
+                                  //         ),
+                                  //       ),
+                                  //     )
+                                  //   ],
+                                  // )
                                 ],
                               )),
                           SizedBox(

@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:overlord_generation/activitiy/create_char.dart';
 import 'package:overlord_generation/res/customColors.dart';
 import 'package:http/http.dart' as http;
 import 'package:overlord_generation/res/values.dart';
@@ -29,6 +31,14 @@ class PracticeScreen extends StatefulWidget implements PreferredSizeWidget {
 
 class _PracticeScreenState extends State<PracticeScreen> {
   String? _selectedLocation; // Option 2
+
+  void charDie() async {
+    final User usr = FirebaseAuth.instance.currentUser!;
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => CreateChar(user: usr),
+    ));
+  }
+
   // final Map char;
   void postData(String s) async {
     var iD = widget.char['id'].toString(),
@@ -57,20 +67,25 @@ class _PracticeScreenState extends State<PracticeScreen> {
         'point': _selectedLocation.toString()
       };
       final uri = Uri.parse("$baseUri/og/update-stats");
-      print(_post);
       try {
         final response = await http.post(uri, body: _post);
 
         final data = json.decode(response.body);
 
-        var msg = "";
+        var msg = "Success";
+        var isDie = false;
+        SharedPreferences pref = await SharedPreferences.getInstance();
         if (data['success']) {
           final _data = data['data'];
           final _uData = _data['user'];
-          final _items = _data['items'];
-          SharedPreferences pref = await SharedPreferences.getInstance();
+          final _char = _data['char'];
+          final _ageLimit = _data['ageLimit'];
+          if (!_ageLimit) {
+            isDie = true;
+            msg = "Your character is die. Create new character again!";
+          }
           pref.setString('userData', json.encode(_uData).toString());
-          pref.setString('itemsData', json.encode(_items).toString());
+          pref.setString('char_data', json.encode(_char).toString());
           // var newGold = _data['do_code'];
           widget.callback();
         }
@@ -78,10 +93,17 @@ class _PracticeScreenState extends State<PracticeScreen> {
         showDialog(
             context: context,
             builder: (BuildContext context) => AlertDialog(
-                  title: const Text("Success"),
+                  title: Text("$msg"),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context, 'OK'),
+                      onPressed: () async {
+                        Navigator.pop(context, 'OK');
+                        Navigator.pop(context, 'OK');
+                        if (isDie) {
+                          await pref.setString('char_data', "");
+                          charDie();
+                        }
+                      },
                       child: const Text('OK'),
                     )
                   ],
